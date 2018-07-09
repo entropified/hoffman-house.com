@@ -1,0 +1,93 @@
+#cloud-config
+debug: true
+disable_root: false
+hostname: ${hostname}
+fqdn: ${hostname}.${hh_dns_domain}
+manage_etc_hosts: true
+packages:
+growpart:
+    mode: auto
+    devices: ['/']
+    ignore_growroot_disabled: false
+bootcmd:
+    - mkdir /home/centos/squirrel
+    - chown centos:centos /home/centos/squirrel
+write_files:
+    - path: /etc/systemd/system/update_route53_mapping.service
+      encoding: base64
+      content: ${base64encode(update_route53_mapping_service)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /etc/systemd/system/squirrelcart.service
+      encoding: base64
+      content: ${base64encode(squirrelcart_service)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /etc/systemd/system/squirrelcart_backup.service
+      encoding: base64
+      content: ${base64encode(squirrelcart_backup_service)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /etc/systemd/system/squirrelcart_backup.timer
+      encoding: base64
+      content: ${base64encode(squirrelcart_backup_timer)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /etc/systemd/system/squirrelcart_cert.service
+      encoding: base64
+      content: ${base64encode(squirrelcart_cert_service)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /etc/systemd/system/squirrelcart_cert.timer
+      encoding: base64
+      content: ${base64encode(squirrelcart_cert_timer)}
+      owner: "root:root"
+      permissions: "0644"
+    - path: /home/centos/squirrel/setup_storage.sh
+      encoding: base64
+      content: ${base64encode(setup_storage_sh)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/start_squirrel.sh
+      encoding: base64
+      content: ${base64encode(start_squirrel_sh)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/backup_squirrel.sh
+      encoding: base64
+      content: ${base64encode(backup_squirrel_sh)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/generate_cert.sh
+      encoding: base64
+      content: ${base64encode(generate_cert_sh)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/nginx.conf
+      encoding: base64
+      content: ${base64encode(nginx_conf)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/nginx.http.conf
+      encoding: base64
+      content: ${base64encode(nginx_http_conf)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/nginx.https.conf
+      encoding: base64
+      content: ${base64encode(nginx_https_conf)}
+      owner: "centos:centos"
+      permissions: "0755"
+    - path: /home/centos/squirrel/docker-compose.yml
+      encoding: base64
+      content: ${base64encode(squirrel_docker_compose)}
+      owner: "centos:centos"
+      permissions: "0644"
+runcmd:
+    # We want to clear out peoples' demo ML jobs every week
+    # just let the ASG reboot this box every day
+    #- echo "/sbin/halt" | /usr/bin/at midnight $$(date -d 'next Saturday' '+%Y-%m-%d')
+    - systemctl enable --now update_route53_mapping
+    - systemctl enable --now squirrelcart
+    - systemctl start squirrelcart_backup.timer
+    - systemctl start squirrelcart_cert.timer

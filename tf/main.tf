@@ -35,13 +35,20 @@ variable env {
   description = "dev/prod"
 }
 
-variable r53_domain {
+variable hh_r53_domain {
   default = "hoffman-house.com"
-  description = "domain"
 }
 
-variable "r53_zone_id" {
+variable hh_r53_zone_id {
   default = "Z3NM2RE1EBLTT5"
+}
+
+variable as_r53_domain {
+  default = "amishscooters.com"
+}
+
+variable as_r53_zone_id {
+  default = "Z3JEIQVSZ5MKEB"
 }
 
 data "aws_ami" "hh-squirrel-ami" {
@@ -84,23 +91,23 @@ resource "aws_default_subnet" "default_az3" {
 }
 
 #resource "aws_route53_record" "hoffman-house_com" {
-#  zone_id = "${var.r53_zone_id}"
-#  name    = "${var.r53_domain}"
+#  zone_id = "${var.hh_r53_zone_id}"
+#  name    = "${var.hh_r53_domain}"
 #  type    = "A"
 #  ttl     = "86048"
-#  records = ["hh-app.${var.env}.${var.r53_domain}"]
+#  records = ["hh-app.${var.env}.${var.hh_r53_domain}"]
 #}
 
 resource "aws_route53_record" "www_hoffman-house_com" {
-  zone_id = "${var.r53_zone_id}"
+  zone_id = "${var.hh_r53_zone_id}"
   name    = "www"
   type    = "CNAME"
   ttl     = "86048"
-  records = ["${var.r53_domain}"]
+  records = ["${var.hh_r53_domain}"]
 }
 
 resource "aws_route53_record" "mail_hoffman-house_com" {
-  zone_id = "${var.r53_zone_id}"
+  zone_id = "${var.hh_r53_zone_id}"
   name    = "mail"
   type    = "CNAME"
   ttl     = "86048"
@@ -108,11 +115,44 @@ resource "aws_route53_record" "mail_hoffman-house_com" {
 }
 
 resource "aws_route53_record" "hoffman-house_mx" {
-  zone_id = "${var.r53_zone_id}"
-  name    = "${var.r53_domain}"
+  zone_id = "${var.hh_r53_zone_id}"
+  name    = "${var.hh_r53_domain}"
   type    = "MX"
   ttl     = "3600"
   records = ["0 mail.hoffman-house.com",
+             "10 shared49.accountservergroup.com"]
+}
+
+resource "aws_route53_record" "amishscooters_com" {
+  zone_id = "${var.as_r53_zone_id}"
+  name    = "${var.as_r53_domain}"
+  type    = "A"
+  ttl     = "86048"
+  records = ["162.215.248.217"]
+}
+
+resource "aws_route53_record" "www_amishscooters_com" {
+  zone_id = "${var.as_r53_zone_id}"
+  name    = "www"
+  type    = "CNAME"
+  ttl     = "86048"
+  records = ["${var.as_r53_domain}"]
+}
+
+resource "aws_route53_record" "mail_amishscooters_com" {
+  zone_id = "${var.as_r53_zone_id}"
+  name    = "mail"
+  type    = "CNAME"
+  ttl     = "86048"
+  records = ["shared49.accountservergroup.com"]
+}
+
+resource "aws_route53_record" "amishscooters_mx" {
+  zone_id = "${var.as_r53_zone_id}"
+  name    = "${var.as_r53_domain}"
+  type    = "MX"
+  ttl     = "3600"
+  records = ["0 mail.amishscooters.com",
              "10 shared49.accountservergroup.com"]
 }
 
@@ -221,7 +261,7 @@ data "template_file" "hh-squirrel-user-data" {
     aws_region = "${var.region}"
     env = "${var.env}"
     hostname = "${var.name}"
-    hh_dns_domain = "${var.env}.${var.r53_domain}"
+    hh_dns_domain = "${var.env}.${var.hh_r53_domain}"
     update_route53_mapping_service = "${file("${path.module}/update_route53_mapping.service")}"
     squirrelcart_service = "${file("${path.module}/squirrelcart.service")}"
     squirrelcart_backup_service = "${file("${path.module}/squirrelcart_backup.service")}"

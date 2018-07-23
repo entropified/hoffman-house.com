@@ -74,6 +74,34 @@ services:
       - 8080:8080
       - 8443:8443
 
+  # For deploying static html like amishscooters.com
+  sc-s3-website-build:
+    container_name: sc-s3-website-build
+    image: sah/sc-s3-website-build:${SC_ENV}
+    #command: "http-server -p 8080"
+    #command: echo "build complete"
+    command: /usr/src/static/wait_for_deploy.sh
+    build:
+      context: docker_s3_website
+      args:
+        SC_ENV: ${SC_ENV}
+        SC_AWS_REGION: ${SC_AWS_REGION}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION: ${SC_AWS_REGION}
+    environment:
+      SC_ENV: ${SC_ENV}
+      SC_AWS_REGION: ${SC_AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${SC_AWS_REGION}
+    ports:
+      - 8000:8000
+    networks:
+      sc-build-net:
+        aliases:
+          - sc-s3-website-build
+
 networks:
   sc-build-net:
     driver: bridge

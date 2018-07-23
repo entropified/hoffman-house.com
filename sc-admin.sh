@@ -13,6 +13,7 @@ SC_DOCKER_BUILD_CONTAINERS=(
 "sc-mysql-build"
 "sc-app-build"
 "sc-nginx-build"
+"sc-s3-website-build"
 )
 SC_DOCKER_BUILD_IMAGES=(
 "sc-smtp-build:$SC_ENV"
@@ -34,6 +35,7 @@ USAGE="SC Admin Usage: $0 [-v]
            push-docker
            local-deploy
            local-stop
+           deploy-static
            validate-environment"
 
 declare -a SC_ADMIN_CMDS=(
@@ -43,6 +45,7 @@ declare -a SC_ADMIN_CMDS=(
     "push-docker"
     "local-deploy"
     "local-stop"
+    "deploy-static"
 )
 
 # These variables must be set external to this script for
@@ -231,7 +234,7 @@ function build_docker() {
     check_run_cmd "aws s3 cp s3://$SC_AWS_S3_BUCKET/backup/${SC_ENV}/$latest_backup/$latest_backup-squirrelcart-hh.sql.gz $TMP_DIR/squirrelcart-hh.sql.gz"
     check_run_cmd "docker cp $TMP_DIR/squirrelcart-hh.sql.gz sc-app-build:$TMP_DIR"
     check_run_cmd "docker cp $TMP_DIR/squirrelcart-hh.tar.gz sc-app-build:$TMP_DIR"
-    check_run_cmd "docker exec sc-nginx-build rm -rf /usr/share/nginx/html && docker cp static sc-nginx-build:/usr/share/nginx/html"
+    check_run_cmd "docker exec sc-nginx-build rm -rf /usr/share/nginx/html && docker cp static/hoffman-house.com sc-nginx-build:/usr/share/nginx/html"
     check_run_cmd "docker exec sc-app-build bash $TMP_DIR/src/install.sh"
     for image in "${SC_DOCKER_IMAGES[@]}"; do
         # Strip out the registry name
@@ -325,6 +328,22 @@ function local_stop() {
     debug_print "END local_stop"
 }
 
+function deploy_static() {
+    debug_print "BEGIN deploy_static"
+
+    docker_cleanup
+
+    local needs_download=false
+
+    check_run_cmd "docker-compose -f docker-compose-build.yml build --force-rm --pull --no-cache sc-s3-website-build"
+    check_run_cmd "docker-compose -f docker-compose-build.yml up -d sc-s3-website-build"
+    check_run_cmd "docker cp static/amishscooters.com sc-s3-website-build:/usr/src/static"
+    check_run_cmd "docker exec sc-s3-website-build /usr/src/static/deploy.sh"
+    check_run_cmd "docker-compose -f docker-compose-build.yml rm --force sc-s3-website-build"
+
+    debug_print "END deploy_static"
+}
+
 function execute_admin_cmd() {
     check_run_cmd "mkdir -p $TMP_DIR"
 
@@ -346,6 +365,9 @@ function execute_admin_cmd() {
             ;;
         "local-stop")
             local_stop
+            ;;
+        "deploy-static")
+            deploy_static
             ;;
     esac
 }

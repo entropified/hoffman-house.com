@@ -90,6 +90,73 @@ resource "aws_default_subnet" "default_az3" {
     }
 }
 
+resource "aws_s3_bucket" "as_s3_bucket" {
+  bucket = "${var.as_r53_domain}"
+  acl = "public-read"
+  tags {
+    Name = "${var.as_r53_domain}"
+  }
+  versioning {
+    enabled = false
+  }
+  force_destroy = true
+  lifecycle {
+    prevent_destroy = false
+  }
+
+  website {
+    index_document = "index.html"
+  }
+
+  policy = <<EOF
+{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Sid":"PublicReadForGetBucketObjects",
+    "Effect":"Allow",
+    "Principal": "*",
+    "Action":["s3:GetObject"],
+      "Resource":["arn:aws:s3:::${var.as_r53_domain}/*"]
+    }
+  ]
+}
+EOF
+
+}
+
+resource "aws_s3_bucket" "www_as_s3_bucket" {
+  bucket = "www.${var.as_r53_domain}"
+  acl = "public-read"
+  tags {
+    Name = "www.${var.as_r53_domain}"
+  }
+  versioning {
+    enabled = false
+  }
+  force_destroy = true
+  lifecycle {
+    prevent_destroy = false
+  }
+
+  website {
+    redirect_all_requests_to = "${var.as_r53_domain}"
+  }
+
+#  policy = <<EOF
+#{
+#  "Version":"2012-10-17",
+#  "Statement":[{
+#    "Sid":"PublicReadForGetBucketObjects",
+#    "Effect":"Allow",
+#    "Principal": "*",
+#    "Action":["s3:GetObject"],
+#      "Resource":["arn:aws:s3:::${var.as_r53_domain}/*"]
+#    }
+#  ]
+#}
+#EOF
+
+}
 #resource "aws_route53_record" "hoffman-house_com" {
 #  zone_id = "${var.hh_r53_zone_id}"
 #  name    = "${var.hh_r53_domain}"

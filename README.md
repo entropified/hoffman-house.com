@@ -49,6 +49,12 @@ It keeps it's state files in s3 and that's why we need to do the init.sh before 
 1. `bash init.sh`
 1. `terraform apply`
 
+# Deploying the static websites like amishscooters.com
+1. Various external sites are also hosted in static s3 buckets.  The source
+code for that is checked in at static/amishscooters.com for example.  When that
+changes the static sides will need to be redeployed:
+   1. `./sc-admin.sh deploy-static`
+
 # Notes about the AWS Configuration
 1. The terraform config defines an auto scaling group of 1 node so that there 
 will always be an instance running.  If the VM or the underlying physical host
@@ -88,4 +94,5 @@ type "yes" at the prompt, and then do a `terraform apply` to spin everything bac
 from scratch.  Note that if you made a website change or someone purchased something
 since the last 30 minute backup job this data would be lost and you would need to 
 recreate it.
-
+1. If you change any of the files for static websites like amishscooters.com
+you will need to do a `sc-admin deploy-static`.

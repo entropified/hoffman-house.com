@@ -11,7 +11,8 @@ ENV PATH /usr/src/static/node_modules/.bin:$PATH
 COPY src /usr/src/static
 WORKDIR /usr/src/static
 RUN npm i npm@latest -g
-RUN npm install s3-website
+# For now we don't need the s3-website package, we'll just copy with aws cli
+#RUN npm install s3-website
 #RUN npm run build
 #incase we locally deploy
 RUN npm install -g http-server

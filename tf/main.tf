@@ -141,22 +141,8 @@ resource "aws_s3_bucket" "www_as_s3_bucket" {
   website {
     redirect_all_requests_to = "${var.as_r53_domain}"
   }
-
-#  policy = <<EOF
-#{
-#  "Version":"2012-10-17",
-#  "Statement":[{
-#    "Sid":"PublicReadForGetBucketObjects",
-#    "Effect":"Allow",
-#    "Principal": "*",
-#    "Action":["s3:GetObject"],
-#      "Resource":["arn:aws:s3:::${var.as_r53_domain}/*"]
-#    }
-#  ]
-#}
-#EOF
-
 }
+
 #resource "aws_route53_record" "hoffman-house_com" {
 #  zone_id = "${var.hh_r53_zone_id}"
 #  name    = "${var.hh_r53_domain}"
@@ -194,8 +180,12 @@ resource "aws_route53_record" "amishscooters_com" {
   zone_id = "${var.as_r53_zone_id}"
   name    = "${var.as_r53_domain}"
   type    = "A"
-  ttl     = "86048"
-  records = ["162.215.248.217"]
+
+  alias {
+    name = "${aws_s3_bucket.as_s3_bucket.website_domain}"
+    zone_id = "${aws_s3_bucket.as_s3_bucket.hosted_zone_id}"
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_route53_record" "www_amishscooters_com" {

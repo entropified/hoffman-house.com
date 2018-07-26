@@ -172,8 +172,19 @@ resource "aws_route53_record" "hoffman-house_mx" {
   name    = "${var.hh_r53_domain}"
   type    = "MX"
   ttl     = "3600"
-  records = ["0 mail.hoffman-house.com",
-             "10 shared49.accountservergroup.com"]
+  #records = ["0 mail.hoffman-house.com",
+             #"10 shared49.accountservergroup.com"]
+  records = ["10 mx1.forwardemail.net",
+             "20 mx2.forwardemail.net"]
+}
+
+resource "aws_route53_record" "hoffman-house_txt" {
+  zone_id = "${var.hh_r53_zone_id}"
+  name    = "${var.hh_r53_domain}"
+  type    = "TXT"
+  ttl     = "3600"
+  records = ["forward-email=Stephan.a.hoffman@gmail.com",
+             "v=spf1 a mx include:spf.forwardemail.net ~all"]
 }
 
 resource "aws_route53_record" "amishscooters_com" {
@@ -204,13 +215,26 @@ resource "aws_route53_record" "mail_amishscooters_com" {
   records = ["shared49.accountservergroup.com"]
 }
 
+# We want to forward all email for the domain to gmail
+#  https://forwardemail.net/
 resource "aws_route53_record" "amishscooters_mx" {
   zone_id = "${var.as_r53_zone_id}"
   name    = "${var.as_r53_domain}"
   type    = "MX"
   ttl     = "3600"
-  records = ["0 mail.amishscooters.com",
-             "10 shared49.accountservergroup.com"]
+  #records = ["0 mail.amishscooters.com",
+             #"10 shared49.accountservergroup.com"]
+  records = ["10 mx1.forwardemail.net",
+             "20 mx2.forwardemail.net"]
+}
+
+resource "aws_route53_record" "amishscooters_txt" {
+  zone_id = "${var.as_r53_zone_id}"
+  name    = "${var.as_r53_domain}"
+  type    = "TXT"
+  ttl     = "3600"
+  records = ["forward-email=Stephan.a.hoffman@gmail.com",
+             "v=spf1 a mx include:spf.forwardemail.net ~all"]
 }
 
 resource "aws_security_group" "hh-squirrel-sg" {

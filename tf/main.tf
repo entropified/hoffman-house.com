@@ -172,10 +172,10 @@ resource "aws_route53_record" "hoffman-house_mx" {
   name    = "${var.hh_r53_domain}"
   type    = "MX"
   ttl     = "3600"
-  #records = ["0 mail.hoffman-house.com",
-             #"10 shared49.accountservergroup.com"]
-  records = ["10 mx1.forwardemail.net",
-             "20 mx2.forwardemail.net"]
+  records = ["0 mail.hoffman-house.com",
+             "10 shared49.accountservergroup.com"]
+  #records = ["10 mx1.forwardemail.net",
+             #"20 mx2.forwardemail.net"]
 }
 
 resource "aws_route53_record" "hoffman-house_txt" {
@@ -222,10 +222,10 @@ resource "aws_route53_record" "amishscooters_mx" {
   name    = "${var.as_r53_domain}"
   type    = "MX"
   ttl     = "3600"
-  #records = ["0 mail.amishscooters.com",
-             #"10 shared49.accountservergroup.com"]
-  records = ["10 mx1.forwardemail.net",
-             "20 mx2.forwardemail.net"]
+  records = ["0 mail.amishscooters.com",
+             "10 shared49.accountservergroup.com"]
+  #records = ["10 mx1.forwardemail.net",
+             #"20 mx2.forwardemail.net"]
 }
 
 resource "aws_route53_record" "amishscooters_txt" {
